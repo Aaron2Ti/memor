@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
+
 require "memor/version"
 
 Gem::Specification.new do |s|
@@ -7,9 +8,9 @@ Gem::Specification.new do |s|
   s.version     = Memor::VERSION
   s.authors     = ["Aaron Tian"]
   s.email       = ["Aaron2Ti@gmail.com"]
-  s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.homepage    = "https://rubygems.org/gems/memor"
+  s.summary     = %q{simple memoize function without alias method chain}
+  s.description = %q{memoize function without alias method chain}
 
   s.rubyforge_project = "memor"
 

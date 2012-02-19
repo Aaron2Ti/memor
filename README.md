@@ -31,3 +31,4 @@ first argument and all the host methods other arguments, see the following examp
 ```
 
 Tested in ruby 1.9.2
+[![Build Status](https://secure.travis-ci.org/Aaron2Ti/memor.png)](http://travis-ci.org/Aaron2Ti/memor)

@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'memor'
 
 describe Memor do
@@ -11,31 +12,37 @@ describe Memor do
     end
 
     def no_arg
-      memor __callee__ do
+      memor binding do
         slow_method
       end
     end
 
     def with_args1(a, b)
-      memor __callee__, a, b do
+      memor binding do
         slow_method
       end
     end
 
     def with_args2(*args)
-      memor __callee__, args do
+      memor binding do
+        slow_method
+      end
+    end
+
+    def with_args3(a, *args)
+      memor binding do
         slow_method
       end
     end
 
     def query?
-      memor __callee__ do
+      memor binding do
         slow_method
       end
     end
 
     def bang!
-      memor __callee__ do
+      memor binding do
         slow_method
       end
     end
@@ -59,15 +66,28 @@ describe Memor do
   it 'fix arguments' do
     foo.with_args1(1, 2).should == 'slow'
     foo.with_args1(1, 2).should == 'slow'
+    foo.with_args1(2, 2).should == 'slow'
+    foo.with_args1(2, 2).should == 'slow'
 
-    foo.slows.should == 1
+    foo.slows.should == 2
   end
 
   it 'splat arguments' do
     foo.with_args2('bar').should == 'slow'
     foo.with_args2('bar').should == 'slow'
+    foo.with_args2('foo').should == 'slow'
+    foo.with_args2('foo').should == 'slow'
 
-    foo.slows.should == 1
+    foo.slows.should == 2
+  end
+
+  it 'normal arguments and splat arguments' do
+    foo.with_args3('bar', 4).should == 'slow'
+    foo.with_args3('bar', 4).should == 'slow'
+    foo.with_args3('bar', 5).should == 'slow'
+    foo.with_args3('bar', 5).should == 'slow'
+
+    foo.slows.should == 2
   end
 
   it '! in method name' do
@@ -82,5 +102,12 @@ describe Memor do
     foo.query?.should == 'slow'
 
     foo.slows.should == 1
+  end
+
+  it '#_memor_parameters' do
+    foo.send(:_memor_arg_names, foo.method(:no_arg)).should == []
+    foo.send(:_memor_arg_names, foo.method(:with_args1)).should == [:a, :b]
+    foo.send(:_memor_arg_names, foo.method(:with_args2)).should == [:args]
+    foo.send(:_memor_arg_names, foo.method(:with_args3)).should == [:a, :args]
   end
 end

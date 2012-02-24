@@ -20,18 +20,24 @@ describe Memor do
     def with_args1(a, b)
       memor binding do
         slow_method
+
+        [a, b]
       end
     end
 
     def with_args2(*args)
       memor binding do
         slow_method
+
+        args
       end
     end
 
     def with_args3(a, *args)
       memor binding do
         slow_method
+
+        [a, args].flatten
       end
     end
 
@@ -63,29 +69,29 @@ describe Memor do
     foo.slows.should == 1
   end
 
-  it 'fix arguments' do
-    foo.with_args1(1, 2).should == 'slow'
-    foo.with_args1(1, 2).should == 'slow'
-    foo.with_args1(2, 2).should == 'slow'
-    foo.with_args1(2, 2).should == 'slow'
+  it 'normal arguments' do
+    foo.with_args1(1, 2).should == [1, 2]
+    foo.with_args1(1, 2).should == [1, 2]
+    foo.with_args1(2, 2).should == [2, 2]
+    foo.with_args1(2, 2).should == [2, 2]
 
     foo.slows.should == 2
   end
 
   it 'splat arguments' do
-    foo.with_args2('bar').should == 'slow'
-    foo.with_args2('bar').should == 'slow'
-    foo.with_args2('foo').should == 'slow'
-    foo.with_args2('foo').should == 'slow'
+    foo.with_args2(1).should == [1]
+    foo.with_args2(1).should == [1]
+    foo.with_args2(2).should == [2]
+    foo.with_args2(2).should == [2]
 
     foo.slows.should == 2
   end
 
   it 'normal arguments and splat arguments' do
-    foo.with_args3('bar', 4).should == 'slow'
-    foo.with_args3('bar', 4).should == 'slow'
-    foo.with_args3('bar', 5).should == 'slow'
-    foo.with_args3('bar', 5).should == 'slow'
+    foo.with_args3(1, 4).should == [1, 4]
+    foo.with_args3(1, 4).should == [1, 4]
+    foo.with_args3(1, 5).should == [1, 5]
+    foo.with_args3(1, 5).should == [1, 5]
 
     foo.slows.should == 2
   end

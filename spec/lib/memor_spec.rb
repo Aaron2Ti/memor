@@ -2,6 +2,23 @@ require 'spec_helper'
 require 'memor'
 
 describe Memor do
+  class Bar
+    extend Memor
+    @slows = 0
+
+    def self.bar
+      memor binding do
+        @slows += 1
+
+        'bar'
+      end
+    end
+
+    def self.slows
+      @slows
+    end
+  end
+
   class Foo
     include Memor
 
@@ -115,5 +132,12 @@ describe Memor do
     foo.send(:_memor_arg_names, foo.method(:with_args1)).should == [:a, :b]
     foo.send(:_memor_arg_names, foo.method(:with_args2)).should == [:args]
     foo.send(:_memor_arg_names, foo.method(:with_args3)).should == [:a, :args]
+  end
+
+  it 'class methods' do
+    Bar.bar
+    Bar.bar.should == 'bar'
+
+    Bar.slows.should == 1
   end
 end

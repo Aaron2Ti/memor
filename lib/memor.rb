@@ -1,5 +1,4 @@
 require 'memor/version'
-require 'ruby-debug'
 
 module Memor
 

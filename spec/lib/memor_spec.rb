@@ -58,6 +58,14 @@ describe Memor do
       end
     end
 
+    def with_args4(a = 1)
+      memor binding do
+        slow_method
+
+        a
+      end
+    end
+
     def query?
       memor binding do
         slow_method
@@ -109,6 +117,15 @@ describe Memor do
     foo.with_args3(1, 4).should == [1, 4]
     foo.with_args3(1, 5).should == [1, 5]
     foo.with_args3(1, 5).should == [1, 5]
+
+    foo.slows.should == 2
+  end
+
+  it 'default value args' do
+    foo.with_args4(1).should == 1
+    foo.with_args4(1).should == 1
+    foo.with_args4(2).should == 2
+    foo.with_args4(2).should == 2
 
     foo.slows.should == 2
   end

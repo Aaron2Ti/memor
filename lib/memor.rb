@@ -1,4 +1,5 @@
 require 'memor/version'
+require 'ruby-debug'
 
 module Memor
 
@@ -50,9 +51,10 @@ private
   end
 
   def _memor_arg_names(memor_method)
-    # parameters is like [[:req, :a], [:req, :b], [:rest, :c], [:block, :d]]
+    # parameters is like [[:req, :a], [:opt, :b], [:rest, :c], [:block, :d]]
+
     value_parameters = memor_method.parameters.map do |pp|
-      if pp[0] == :req or pp[0] == :rest
+      if [:req, :rest, :opt].include? pp[0]
         pp[1]
       end
     end.compact

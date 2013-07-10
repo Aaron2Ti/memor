@@ -10,6 +10,8 @@ This lib has one utility method called **memor** which takes *binding* as an
   class Foo
     include Memor
 
+    attr_accessor :age
+
     def slow_method1
       memor binding do
         # slow stuff
@@ -27,7 +29,22 @@ This lib has one utility method called **memor** which takes *binding* as an
         # slow stuff
       end
     end
+
+    def double_age
+      memor binding, :age do
+        age * 2
+      end
+    end
+
   end
+
+  foo = Foo.new
+
+  foo.age = 2
+  foo.double_age # 4
+
+  foo.age = 3
+  foo.double_age # 6
 ```
 
 Tested in ruby 1.9.2

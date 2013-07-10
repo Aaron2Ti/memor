@@ -35,7 +35,9 @@ module Memor
     end
 
     def explicit_dependents_values
-      []
+      @explicit_dependents.map do |ed_name|
+        @the_context_binding.eval ed_name.to_s
+      end
     end
 
     def args_values

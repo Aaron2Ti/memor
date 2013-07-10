@@ -23,9 +23,16 @@ describe Memor do
     include Memor
 
     attr_reader :slows
+    attr_accessor :the_explicit_depend_value
 
     def initialize
       @slows = 0
+    end
+
+    def explicit_depend_value
+      memor binding, :the_explicit_depend_value do
+        the_explicit_depend_value
+      end
     end
 
     def no_arg
@@ -149,5 +156,13 @@ describe Memor do
     Bar.bar.should == 'bar'
 
     Bar.slows.should == 1
+  end
+
+  it 'explicit depend value' do
+    foo.explicit_depend_value.should == nil
+
+    foo.the_explicit_depend_value = 3
+
+    foo.explicit_depend_value.should == 3
   end
 end

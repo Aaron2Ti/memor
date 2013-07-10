@@ -1,6 +1,77 @@
 require 'memor/version'
 
 module Memor
+  class PrivateMemoizeInstance
+    def initialize(the_caller, the_context_binding, explicit_dependents)
+      @the_caller          = the_caller
+      @the_context_binding = the_context_binding
+      @explicit_dependents = explicit_dependents
+    end
+
+    def callee
+      @the_context_binding.eval '__callee__'
+    end
+
+    def memor_name
+     "@____memor_#{callee}".gsub('?', '_question_mark')
+                           .gsub('!', '_bang')
+    end
+
+    def memor_method
+      @the_caller.method callee
+    end
+
+    def memoize_wrap
+      if memoize_lookup_key.empty?
+        memoize_without_dependent { yield }
+
+      else
+        memoize_with_dependents { yield }
+      end
+    end
+
+    def memoize_lookup_key
+      args_values + explicit_dependents_values
+    end
+
+    def explicit_dependents_values
+      []
+    end
+
+    def args_values
+      # parameters is like [[:req, :a], [:opt, :b], [:rest, :c], [:block, :d]]
+      value_parameters = memor_method.parameters.map do |pp|
+        if [:req, :rest, :opt].include? pp[0]
+          pp[1]
+        end
+      end.compact.map do |arg_name|
+        @the_context_binding.eval arg_name.to_s
+      end
+    end
+
+    def memoize_without_dependent
+      unless @the_caller.instance_variable_defined? memor_name
+        @the_caller.instance_variable_set memor_name, yield
+      end
+
+      @the_caller.instance_variable_get memor_name
+    end
+
+    def memoize_with_dependents
+      unless @the_caller.instance_variable_defined? memor_name
+        @the_caller.instance_variable_set memor_name, {}
+      end
+
+      buckets = @the_caller.instance_variable_get memor_name
+
+      unless buckets.has_key?(memoize_lookup_key)
+        buckets[memoize_lookup_key] = yield
+      end
+
+      buckets[memoize_lookup_key]
+    end
+
+  end
 
 private
 
@@ -22,64 +93,9 @@ private
   #   end
   # end
   #
-  def memor(context_binding)
-    callee = context_binding.eval '__callee__'
-
-    memor_name = "@_memor_#{callee}".gsub('?', '_question_mark')
-                                    .gsub('!', '_bang')
-
-    memor_method = method(callee)
-
-    if memor_method.arity == 0 # no argument
-      _memor_with_no_arg(memor_name) { yield }
-
-    else
-      # FIXME args may be insufficient
-      args = _memor_args(memor_method, context_binding)
-
-      _memor_with_args(memor_name, args) { yield }
-    end
-  end
-
-  def _memor_args(memor_method, context_binding)
-    arg_names = _memor_arg_names(memor_method)
-
-    arg_names.map do |arg_name|
-      context_binding.eval arg_name.to_s
-    end
-  end
-
-  def _memor_arg_names(memor_method)
-    # parameters is like [[:req, :a], [:opt, :b], [:rest, :c], [:block, :d]]
-
-    value_parameters = memor_method.parameters.map do |pp|
-      if [:req, :rest, :opt].include? pp[0]
-        pp[1]
-      end
-    end.compact
-  end
-
-  def _memor_with_no_arg(memor_name)
-    unless instance_variable_defined? memor_name
-      instance_variable_set memor_name, yield
-    end
-
-    instance_variable_get memor_name
-  end
-
-  def _memor_with_args(memor_name, args)
-    unless instance_variable_defined? memor_name
-      instance_variable_set memor_name, {}
-    end
-
-    memor = instance_variable_get memor_name
-    key = [* args] # use the args array as the cache key
-
-    unless memor.has_key?(key)
-      memor[key] = yield
-    end
-
-    memor[key]
+  def memor(context_binding, *explicit_dependents)
+    PrivateMemoizeInstance.new(self, context_binding, explicit_dependents)
+                          .memoize_wrap { yield }
   end
 
 end

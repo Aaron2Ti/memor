@@ -144,13 +144,6 @@ describe Memor do
     foo.slows.should == 1
   end
 
-  it '#_memor_parameters' do
-    foo.send(:_memor_arg_names, foo.method(:no_arg)).should == []
-    foo.send(:_memor_arg_names, foo.method(:with_args1)).should == [:a, :b]
-    foo.send(:_memor_arg_names, foo.method(:with_args2)).should == [:args]
-    foo.send(:_memor_arg_names, foo.method(:with_args3)).should == [:a, :args]
-  end
-
   it 'class methods' do
     Bar.bar
     Bar.bar.should == 'bar'

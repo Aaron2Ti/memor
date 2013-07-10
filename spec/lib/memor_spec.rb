@@ -31,6 +31,8 @@ describe Memor do
 
     def explicit_depend_value
       memor binding, :the_explicit_depend_value do
+        slow_method
+
         the_explicit_depend_value
       end
     end
@@ -160,9 +162,15 @@ describe Memor do
 
   it 'explicit depend value' do
     foo.explicit_depend_value.should == nil
+    foo.explicit_depend_value.should == nil
+
+    foo.slows.should == 1
 
     foo.the_explicit_depend_value = 3
 
     foo.explicit_depend_value.should == 3
+    foo.explicit_depend_value.should == 3
+
+    foo.slows.should == 2
   end
 end

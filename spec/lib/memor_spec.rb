@@ -97,80 +97,80 @@ describe Memor do
   let(:foo) { Foo.new }
 
   it 'no argument' do
-    foo.no_arg.should == 'slow'
-    foo.no_arg.should == 'slow'
+    expect(foo.no_arg).to eq 'slow'
+    expect(foo.no_arg).to eq 'slow'
 
-    foo.slows.should == 1
+    expect(foo.slows).to eq 1
   end
 
   it 'normal arguments' do
-    foo.with_args1(1, 2).should == [1, 2]
-    foo.with_args1(1, 2).should == [1, 2]
-    foo.with_args1(2, 2).should == [2, 2]
-    foo.with_args1(2, 2).should == [2, 2]
+    expect(foo.with_args1(1, 2)).to eq [1, 2]
+    expect(foo.with_args1(1, 2)).to eq [1, 2]
+    expect(foo.with_args1(2, 2)).to eq [2, 2]
+    expect(foo.with_args1(2, 2)).to eq [2, 2]
 
-    foo.slows.should == 2
+    expect(foo.slows).to eq 2
   end
 
   it 'splat arguments' do
-    foo.with_args2(1).should == [1]
-    foo.with_args2(1).should == [1]
-    foo.with_args2(2).should == [2]
-    foo.with_args2(2).should == [2]
+    expect(foo.with_args2(1)).to eq [1]
+    expect(foo.with_args2(1)).to eq [1]
+    expect(foo.with_args2(2)).to eq [2]
+    expect(foo.with_args2(2)).to eq [2]
 
-    foo.slows.should == 2
+    expect(foo.slows).to eq 2
   end
 
   it 'normal arguments and splat arguments' do
-    foo.with_args3(1, 4).should == [1, 4]
-    foo.with_args3(1, 4).should == [1, 4]
-    foo.with_args3(1, 5).should == [1, 5]
-    foo.with_args3(1, 5).should == [1, 5]
+    expect(foo.with_args3(1, 4)).to eq [1, 4]
+    expect(foo.with_args3(1, 4)).to eq [1, 4]
+    expect(foo.with_args3(1, 5)).to eq [1, 5]
+    expect(foo.with_args3(1, 5)).to eq [1, 5]
 
-    foo.slows.should == 2
+    expect(foo.slows).to eq 2
   end
 
   it 'default value args' do
-    foo.with_args4(1).should == 1
-    foo.with_args4(1).should == 1
-    foo.with_args4(2).should == 2
-    foo.with_args4(2).should == 2
+    expect(foo.with_args4(1)).to eq 1
+    expect(foo.with_args4(1)).to eq 1
+    expect(foo.with_args4(2)).to eq 2
+    expect(foo.with_args4(2)).to eq 2
 
-    foo.slows.should == 2
+    expect(foo.slows).to eq 2
   end
 
   it '! in method name' do
-    foo.bang!.should == 'slow'
-    foo.bang!.should == 'slow'
+    expect(foo.bang!).to eq 'slow'
+    expect(foo.bang!).to eq 'slow'
 
-    foo.slows.should == 1
+    expect(foo.slows).to eq 1
   end
 
   it '? in method name' do
-    foo.query?.should == 'slow'
-    foo.query?.should == 'slow'
+    expect(foo.query?).to eq 'slow'
+    expect(foo.query?).to eq 'slow'
 
-    foo.slows.should == 1
+    expect(foo.slows).to eq 1
   end
 
   it 'class methods' do
     Bar.bar
-    Bar.bar.should == 'bar'
+    expect(Bar.bar).to eq 'bar'
 
-    Bar.slows.should == 1
+    expect(Bar.slows).to eq 1
   end
 
   it 'explicit depend value' do
-    foo.explicit_depend_value.should == nil
-    foo.explicit_depend_value.should == nil
+    expect(foo.explicit_depend_value).to eq nil
+    expect(foo.explicit_depend_value).to eq nil
 
-    foo.slows.should == 1
+    expect(foo.slows).to eq 1
 
     foo.the_explicit_depend_value = 3
 
-    foo.explicit_depend_value.should == 3
-    foo.explicit_depend_value.should == 3
+    expect(foo.explicit_depend_value).to eq 3
+    expect(foo.explicit_depend_value).to eq 3
 
-    foo.slows.should == 2
+    expect(foo.slows).to eq 2
   end
 end

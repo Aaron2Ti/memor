@@ -2,74 +2,55 @@ require 'spec_helper'
 require 'memor'
 
 describe Memor do
-  class Bar
-    extend Memor
-    @slows = 0
-
-    def self.bar
-      memor binding do
-        @slows += 1
-
-        'bar'
-      end
-    end
-
-    def self.slows
-      @slows
-    end
-  end
-
   class Foo
+    extend Memor
     include Memor
 
-    attr_reader :slows
-    attr_accessor :the_explicit_depend_value
+    @static_calls = 0
+
+    def self.static_calls
+      @static_calls
+    end
+
+    def self.static_fun
+      memor binding do
+        @static_calls += 1
+
+        :static_fun
+      end
+    end
 
     def initialize
-      @slows = 0
+      @calls = 0
     end
 
-    def explicit_depend_value
-      memor binding, :the_explicit_depend_value do
-        slow_method
+    def no_args
+      memor binding do
+        @calls += 1
 
-        the_explicit_depend_value
+        :ok
       end
     end
 
-    def no_arg
+    def arg1(a)
       memor binding do
-        slow_method
+        @calls += 1
+
+        a
       end
     end
 
-    def with_args1(a, b)
+    def splat_args(*args)
       memor binding do
-        slow_method
-
-        [a, b]
-      end
-    end
-
-    def with_args2(*args)
-      memor binding do
-        slow_method
+        @calls += 1
 
         args
       end
     end
 
-    def with_args3(a, *args)
+    def default_arg(a = 1)
       memor binding do
-        slow_method
-
-        [a, args].flatten
-      end
-    end
-
-    def with_args4(a = 1)
-      memor binding do
-        slow_method
+        @calls += 1
 
         a
       end
@@ -77,100 +58,78 @@ describe Memor do
 
     def query?
       memor binding do
-        slow_method
+        @calls += 1
+
+        :query
       end
     end
 
     def bang!
       memor binding do
-        slow_method
+        @calls += 1
+
+        :bang
       end
     end
 
-    def slow_method
-      @slows += 1
 
-      'slow'
+    def calls
+      @calls
     end
   end
 
   let(:foo) { Foo.new }
 
-  it 'no argument' do
-    expect(foo.no_arg).to eq 'slow'
-    expect(foo.no_arg).to eq 'slow'
+  it 'no_args' do
+    foo.no_args
 
-    expect(foo.slows).to eq 1
+    expect(foo.no_args).to eq :ok
+    expect(foo.calls).to   eq 1
   end
 
-  it 'normal arguments' do
-    expect(foo.with_args1(1, 2)).to eq [1, 2]
-    expect(foo.with_args1(1, 2)).to eq [1, 2]
-    expect(foo.with_args1(2, 2)).to eq [2, 2]
-    expect(foo.with_args1(2, 2)).to eq [2, 2]
+  it 'arg1' do
+    foo.arg1 1
 
-    expect(foo.slows).to eq 2
+    expect(foo.arg1 1).to eq 1
+    expect(foo.arg1 2).to eq 2
+
+    expect(foo.calls).to  eq 2
   end
 
   it 'splat arguments' do
-    expect(foo.with_args2(1)).to eq [1]
-    expect(foo.with_args2(1)).to eq [1]
-    expect(foo.with_args2(2)).to eq [2]
-    expect(foo.with_args2(2)).to eq [2]
+    foo.splat_args(1)
+    foo.splat_args(2)
+    foo.splat_args(2)
 
-    expect(foo.slows).to eq 2
+    expect(foo.calls).to eq 2
   end
 
-  it 'normal arguments and splat arguments' do
-    expect(foo.with_args3(1, 4)).to eq [1, 4]
-    expect(foo.with_args3(1, 4)).to eq [1, 4]
-    expect(foo.with_args3(1, 5)).to eq [1, 5]
-    expect(foo.with_args3(1, 5)).to eq [1, 5]
+  it 'query suffix' do
+    foo.query?
+    foo.query?
 
-    expect(foo.slows).to eq 2
+    expect(foo.calls).to eq 1
   end
 
-  it 'default value args' do
-    expect(foo.with_args4(1)).to eq 1
-    expect(foo.with_args4(1)).to eq 1
-    expect(foo.with_args4(2)).to eq 2
-    expect(foo.with_args4(2)).to eq 2
+  it 'bang suffix' do
+    foo.bang!
+    foo.bang!
 
-    expect(foo.slows).to eq 2
+    expect(foo.calls).to eq 1
   end
 
-  it '! in method name' do
-    expect(foo.bang!).to eq 'slow'
-    expect(foo.bang!).to eq 'slow'
+  it 'default_arg' do
+    foo.default_arg
+    foo.default_arg 1
+    foo.default_arg 2
 
-    expect(foo.slows).to eq 1
+    expect(foo.calls).to eq 2
   end
 
-  it '? in method name' do
-    expect(foo.query?).to eq 'slow'
-    expect(foo.query?).to eq 'slow'
+  it 'memoize static_fun' do
+    Foo.static_fun
+    Foo.static_fun
 
-    expect(foo.slows).to eq 1
-  end
-
-  it 'class methods' do
-    Bar.bar
-    expect(Bar.bar).to eq 'bar'
-
-    expect(Bar.slows).to eq 1
-  end
-
-  it 'explicit depend value' do
-    expect(foo.explicit_depend_value).to eq nil
-    expect(foo.explicit_depend_value).to eq nil
-
-    expect(foo.slows).to eq 1
-
-    foo.the_explicit_depend_value = 3
-
-    expect(foo.explicit_depend_value).to eq 3
-    expect(foo.explicit_depend_value).to eq 3
-
-    expect(foo.slows).to eq 2
+    expect(Foo.static_calls).to eq 1
   end
 end

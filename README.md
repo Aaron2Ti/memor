@@ -47,5 +47,5 @@ This lib has one utility method called **memor** which takes *binding* as an
   foo.double_age # 6
 ```
 
-Tested in ruby 1.9.2, 1.9.3 and 2.0.0
+Tested in ruby 1.9.3, 2.0.0 and 2.1.1
 [![Build Status](https://secure.travis-ci.org/Aaron2Ti/memor.png)](http://travis-ci.org/Aaron2Ti/memor)

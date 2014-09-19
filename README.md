@@ -31,6 +31,7 @@ This lib has one utility method called **memor** which takes *binding* as an
     end
 
     def double_age
+      # this block would explicitly depend on the 'age' state of current instance
       memor binding, :age do
         age * 2
       end

@@ -72,7 +72,6 @@ describe Memor do
       end
     end
 
-
     def calls
       @calls
     end
@@ -131,5 +130,44 @@ describe Memor do
     Foo.static_fun
 
     expect(Foo.static_calls).to eq 1
+  end
+
+  class Bar
+    include Memor
+
+    def initialize(age)
+      @age = age
+
+      @calls = 0
+    end
+    attr_accessor :age
+
+    def age_in_coming_year
+      memor binding, :age do
+        @calls += 1
+
+        @age + 1
+      end
+    end
+
+    def calls
+      @calls
+    end
+  end
+
+  it 'explicitly depend on instance states' do
+    bar = Bar.new 21
+
+    bar.age_in_coming_year
+    bar.age_in_coming_year
+
+    expect(bar.calls).to eq 1
+
+    bar.age = 31
+
+    bar.age_in_coming_year
+    bar.age_in_coming_year
+
+    expect(bar.calls).to eq 2
   end
 end
